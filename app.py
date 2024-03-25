@@ -138,22 +138,7 @@ st.markdown(f"<h2 class=h2-text-style>{ticker.upper()}</h2>",unsafe_allow_html=T
 main_col1,main_col2 = st.columns(2)
 with main_col1:            
     tab1, tab2, tab3 = st.tabs(["Historical Date", "Cash Flow", "Balance Sheet"])
-
     try:
-        with tab1:
-            data.index = data.index.dt.strftime("%Y/%b/%d, %H:%M:%S")
-            data.index  = pd.to_datetime(data.index)
-
-            st.dataframe(data.sort_values(by="Date",ascending=False),height=500)
-            data=data.sort_index(ascending=False)
-            graph=data
-        with tab2:
-            st.write(cash_flow)
-        with tab3:
-            st.write(balance_sheet)
-
-
-    except:
         with tab1:
             data.index = pd.to_datetime(data.index)
             data.index = data.index.strftime("%Y/%b/%d, %H:%M:%S")
@@ -170,7 +155,9 @@ with main_col1:
                 st.dataframe(balance_sheet,use_container_width=True,)
             except:
                 st.write("No Data Available")
-                
+        
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}")
 def fill_green(data,name,ax1):
     ymin = min(data[name])
     ymax = max(data[name])
