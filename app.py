@@ -257,7 +257,7 @@ def create_plot(name: str, label: str, title_info: str, data, period_var: str):
 
 
 with main_col2:
-    tab4, tab5, tab6,tab7 = st.tabs(["Open", "Close", "Volume","Change Profit"])
+    tab4, tab5, tab6,tab7,tab8 = st.tabs(["Open", "Close", "Volume","Change Profit","Return Histogram"])
 
     with tab4:
         try:
@@ -280,11 +280,20 @@ with main_col2:
     with tab7:
         try:
             data["return"] = data["Close"].pct_change()
-            fig = plt.figure()
+            fig_change = plt.figure()
             plt.title(f'{ticker} {interval_var} Return',color="white")
             plt.plot(data['return'])
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig_change,use_container_width=True)
         except:
             st.write("No Data Available")
 
 
+    with tab8:
+        try : 
+            fig_hist = plt.figure()
+            plt.title(f'{ticker} {interval_var} Return Histogram',color="white")
+            data['return'].hist(bins=200, grid=False)
+            st.plotly_chart(fig_hist,use_container_width=True)
+            
+        except:
+            st.write("No Data Available")
