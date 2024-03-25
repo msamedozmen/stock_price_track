@@ -35,6 +35,14 @@ st.markdown("""
                 font-weight: bold;
                 text-align: center ;
             }
+                        .h2-text-style{
+                font-size : 36px;
+                color:orange;
+                font-family: Tahoma, Verdana, sans-serif;
+                font-weight: bold;
+                text-align: center ;
+            }
+
             form-title-text {
                 font-size : 24px;
                 color:orange;
@@ -89,6 +97,17 @@ st.markdown("""
 
 st.markdown(f"<h1 class=h1-text-style> MSO FINANCE</h1>",unsafe_allow_html=True)
 
+ticker = "S&P 500"
+data = sp500 = yf.Ticker("^GSPC").history(period="5y")
+data = data.drop(columns=['Dividends', 'Stock Splits'])
+period_var = "5y"
+interval_var ="1d"
+
+
+# data.index = pd.to_datetime(data.index)
+# data.index = data.index.strftime("%Y/%b/%d, %H:%M:%S")
+# data.index = pd.to_datetime(data.index)
+# data=data.sort_index(ascending=False)
 
 with st.sidebar.form("ticker_form"):
     st.markdown("<p class='form-title-text'>Setuo Your Data</p>", unsafe_allow_html=True)
@@ -114,40 +133,44 @@ with st.sidebar.form("ticker_form"):
     
 
 
+st.markdown(f"<h2 class=h2-text-style>{ticker.upper()}</h2>",unsafe_allow_html=True)
 
 main_col1,main_col2 = st.columns(2)
-
 with main_col1:            
     tab1, tab2, tab3 = st.tabs(["Historical Date", "Cash Flow", "Balance Sheet"])
 
-    if len(data)>1:
-        try:
-            with tab1:
-                data.index = data.index.dt.strftime("%Y/%b/%d, %H:%M:%S")
-                data.index  = pd.to_datetime(data.index)
+    try:
+        with tab1:
+            data.index = data.index.dt.strftime("%Y/%b/%d, %H:%M:%S")
+            data.index  = pd.to_datetime(data.index)
 
-                st.dataframe(data.sort_values(by="Date",ascending=False),height=500)
-                data=data.sort_index(ascending=False)
-                graph=data
-            with tab2:
-                st.write(cash_flow)
-            with tab3:
-                st.write(balance_sheet)
+            st.dataframe(data.sort_values(by="Date",ascending=False),height=500)
+            data=data.sort_index(ascending=False)
+            graph=data
+        with tab2:
+            st.write(cash_flow)
+        with tab3:
+            st.write(balance_sheet)
 
 
-        except:
-            with tab1:
-                data.index = pd.to_datetime(data.index)
-                data.index = data.index.strftime("%Y/%b/%d, %H:%M:%S")
-                data.index = pd.to_datetime(data.index)
-
-                data=data.sort_index(ascending=False)
-                st.dataframe(data,use_container_width=True,height=500)
-            with tab2:
+    except:
+        with tab1:
+            data.index = pd.to_datetime(data.index)
+            data.index = data.index.strftime("%Y/%b/%d, %H:%M:%S")
+            data.index = pd.to_datetime(data.index)
+            data=data.sort_index(ascending=False)
+            st.dataframe(data,use_container_width=True,height=500)
+        with tab2:
+            try: 
                 st.dataframe(cash_flow,use_container_width=True,)
-            with tab3:
+            except:
+                st.write("No Data Available")
+        with tab3:
+            try:
                 st.dataframe(balance_sheet,use_container_width=True,)
-
+            except:
+                st.write("No Data Available")
+                
 def fill_green(data,name,ax1):
     ymin = min(data[name])
     ymax = max(data[name])
@@ -234,20 +257,34 @@ def create_plot(name: str, label: str, title_info: str, data, period_var: str):
 
 
 with main_col2:
-    tab4, tab5, tab6 = st.tabs(["Open", "Close", "Volume"])
+    tab4, tab5, tab6,tab7 = st.tabs(["Open", "Close", "Volume","Change Profit"])
 
-    if len(data)>1:
-        with tab4:
-            open_fig = create_plot(name="Open",label="Price",title_info="Open Prices",data=data,period_var=period_var)
+    with tab4:
+        try:
+            open_fig = create_plot(name="Open",label="Price",title_info="Open Prices",data=data,period_var="period_var")
             st.pyplot(open_fig,use_container_width=True)
-
-        with tab5:
+        except:
+            st.write("No Data Available")
+    with tab5:
+        try:
             close_fig = create_plot(name="Close",label="Price",title_info="Close Prices",data=data,period_var=period_var)
             st.pyplot(close_fig,use_container_width=True)
-
-        with tab6:
+        except:
+            st.write("No Data Available")
+    with tab6:
+        try:
             volume_fig = create_plot(name="Volume",label="Count",title_info="Volume Count",data=data,period_var=period_var)
             st.pyplot(volume_fig,use_container_width=True)
-
+        except:
+            st.write("No Data Available")
+    with tab7:
+        try:
+            data["return"] = data["Close"].pct_change()
+            fig = plt.figure()
+            plt.title(f'{ticker} {interval_var} Return',color="white")
+            plt.plot(data['return'])
+            st.plotly_chart(fig,use_container_width=True)
+        except:
+            st.write("No Data Available")
 
 
