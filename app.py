@@ -104,11 +104,6 @@ period_var = "5y"
 interval_var ="1d"
 
 
-# data.index = pd.to_datetime(data.index)
-# data.index = data.index.strftime("%Y/%b/%d, %H:%M:%S")
-# data.index = pd.to_datetime(data.index)
-# data=data.sort_index(ascending=False)
-
 with st.sidebar.form("ticker_form"):
     st.markdown("<p class='form-title-text'>Setuo Your Data</p>", unsafe_allow_html=True)
     label=st.text_input("Stock Label")
