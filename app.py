@@ -57,8 +57,33 @@ st.markdown("""
         .dvn-scroller .glideDataEditor
  {
      height:900px;}        
+     .st-emotion-cache-1v0mbdj .e115fcil1 {
+         margin:50px;
+     }
+     #tabs-bui12-tabpanel-1{
+         margin:100px;
+     }
      
-     
+     .st-emotion-cache-0 .e1f1d6gn0 {
+         height:800px;
+                  margin:50px;
+                    
+     }
+     .element-container .st-emotion-cache-1ods9e .e1f1d6gn4{
+         height:800px;
+         margin:px;
+
+     }
+     .st-emotion-cache-9aoz2h .e1vs0wn30 {
+         height:800px;
+            margin:50px;
+            margin-top:100px;
+
+     }
+     .st-emotion-cache-e370rw .e1vs0wn31 {
+         height:800px
+
+     }
      </style>
             """,unsafe_allow_html=True)
 
@@ -78,6 +103,9 @@ with st.sidebar.form("ticker_form"):
             ticker = label
             period_var,interval_var = period_interval_setup(period=period)
             stock= yf.Ticker(f"{ticker}")
+            cash_flow =stock.get_cashflow()
+            balance_sheet = stock.get_balance_sheet()
+            
             data = stock.history(interval=f"{interval_var}",period=f"{period_var}")
             # data = data.drop(columns=["Dividends", "Stock Splits"],axis=1)
             if data.empty:
@@ -90,31 +118,35 @@ with st.sidebar.form("ticker_form"):
 main_col1,main_col2 = st.columns(2)
 
 with main_col1:            
+    tab1, tab2, tab3 = st.tabs(["Historical Date", "Cash Flow", "Balance Sheet"])
+
     if len(data)>1:
         try:
-            data.index = data.index.dt.strftime("%Y/%b/%d, %H:%M:%S")
-            data.index  = pd.to_datetime(data.index)
+            with tab1:
+                data.index = data.index.dt.strftime("%Y/%b/%d, %H:%M:%S")
+                data.index  = pd.to_datetime(data.index)
 
-            st.dataframe(data.sort_values(by="Date",ascending=False),height=800)
-            data=data.sort_index(ascending=False)
-            graph=data
+                st.dataframe(data.sort_values(by="Date",ascending=False),height=500)
+                data=data.sort_index(ascending=False)
+                graph=data
+            with tab2:
+                st.write(cash_flow)
+            with tab3:
+                st.write(balance_sheet)
+
 
         except:
-            data.index = pd.to_datetime(data.index)
-            # data.index = data.index.dt.strftime("%Y/%b/%d, %H:%M:%S")
-            # data.index  = pd.to_datetime(data.index)
-            
-            # data= data.sort_index(ascending=False)
-            data=data.sort_index(ascending=False)
-            st.dataframe(data,use_container_width=True,height=800)
+            with tab1:
+                data.index = pd.to_datetime(data.index)
+                data.index = data.index.strftime("%Y/%b/%d, %H:%M:%S")
+                data.index = pd.to_datetime(data.index)
 
-
-
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from matplotlib.dates import DateFormatter
-import pandas as pd
-import numpy as np
+                data=data.sort_index(ascending=False)
+                st.dataframe(data,use_container_width=True,height=500)
+            with tab2:
+                st.dataframe(cash_flow,use_container_width=True,)
+            with tab3:
+                st.dataframe(balance_sheet,use_container_width=True,)
 
 def fill_green(data,name,ax1):
     ymin = min(data[name])
@@ -128,7 +160,7 @@ def fill_green(data,name,ax1):
 
 
 def create_plot(name: str, label: str, title_info: str, data, period_var: str):
-    fig, ax1 = plt.subplots(figsize=(24, 6), sharex=True)
+    fig, ax1 = plt.subplots(figsize=(24, 18), sharex=True)
 
     data.index = pd.to_datetime(data.index)
     ax1.set_ylabel(name)
@@ -200,14 +232,22 @@ def create_plot(name: str, label: str, title_info: str, data, period_var: str):
     
     return fig
 
-with main_col2:
-    if len(data)>1:
-        open_fig = create_plot(name="Open",label="Price",title_info="Open Prices",data=data,period_var=period_var)
-        close_fig = create_plot(name="Close",label="Price",title_info="Close Prices",data=data,period_var=period_var)
-        volume_fig = create_plot(name="Volume",label="Count",title_info="Volume Count",data=data,period_var=period_var)
 
-        st.pyplot(open_fig,use_container_width=True)
-        st.pyplot(close_fig,use_container_width=True)
-        st.pyplot(volume_fig,use_container_width=True)
+with main_col2:
+    tab4, tab5, tab6 = st.tabs(["Open", "Close", "Volume"])
+
+    if len(data)>1:
+        with tab4:
+            open_fig = create_plot(name="Open",label="Price",title_info="Open Prices",data=data,period_var=period_var)
+            st.pyplot(open_fig,use_container_width=True)
+
+        with tab5:
+            close_fig = create_plot(name="Close",label="Price",title_info="Close Prices",data=data,period_var=period_var)
+            st.pyplot(close_fig,use_container_width=True)
+
+        with tab6:
+            volume_fig = create_plot(name="Volume",label="Count",title_info="Volume Count",data=data,period_var=period_var)
+            st.pyplot(volume_fig,use_container_width=True)
+
 
 
